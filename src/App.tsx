@@ -15,7 +15,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Replace '@fcturgut' with your actual Medium username
     const mediumUsername = "@fcturgut"; 
     const rssUrl = `https://medium.com/feed/${mediumUsername}`;
     const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
@@ -69,7 +68,7 @@ export default function App() {
             transition={{ delay: 0.2 }}
             className="text-xs uppercase tracking-[0.3em] text-white/50 mb-6 font-mono"
           >
-            Available for new opportunities
+            Let's Connect!
           </motion.p>
           
           <motion.h1 
@@ -93,7 +92,7 @@ export default function App() {
             </p>
             <div className="flex gap-6">
               <SocialIcon icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/fcturgut/" />
-              <SocialIcon icon={<Mail size={20} />} href="mailto:fatih.turgut@devoteam.com" />
+              <SocialIcon icon={<Mail size={20} />} href="mailto:fcturgut@gmail.com" />
             </div>
           </motion.div>
         </div>
@@ -212,10 +211,10 @@ export default function App() {
           <h2 className="text-xs uppercase tracking-[0.3em] text-white/50 mb-12 font-mono">03 / Connection</h2>
           <h3 className="text-5xl md:text-8xl font-serif italic mb-12">Let's architect <br /> the future.</h3>
           <a 
-            href="mailto:fatih.turgut@devoteam.com" 
+            href="mailto:fcturgut@gmail.com" 
             className="inline-flex items-center gap-4 text-2xl border-b border-white/20 pb-2 hover:border-white transition-colors"
           >
-            fatih.turgut@devoteam.com <ArrowUpRight />
+            fcturgut@gmail.com <ArrowUpRight />
           </a>
         </div>
       </section>
@@ -225,7 +224,7 @@ export default function App() {
         <p className="text-xs text-white/40 font-mono uppercase tracking-widest">© 2026 Fatih C. Turgut</p>
         <div className="flex gap-8 text-xs text-white/40 font-mono uppercase tracking-widest">
           <a href="https://www.linkedin.com/in/fcturgut/" className="hover:text-white transition-colors">LinkedIn</a>
-          <a href="mailto:fatih.turgut@devoteam.com" className="hover:text-white transition-colors">Email</a>
+          <a href="mailto:fcturgut@gmail.com" className="hover:text-white transition-colors">Email</a>
         </div>
       </footer>
     </div>
