@@ -231,7 +231,7 @@ export default function App() {
   );
 }
 
-function ArticleCard({ article, index }: { article: Article; index: number; key?: any }) {
+function ArticleCard({ article, index }: { article: Article; index: number }) {
   // Helper to strip HTML and get first few sentences
   const getSnippet = (html: string) => {
     const text = html.replace(/<[^>]*>/g, '');
