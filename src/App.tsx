@@ -17,17 +17,59 @@ export default function App() {
   useEffect(() => {
     const mediumUsername = "@fcturgut"; 
     const rssUrl = `https://medium.com/feed/${mediumUsername}`;
-    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
+    
+    // Using allorigins proxy to bypass CORS and get the raw XML
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
 
-    fetch(apiUrl)
-      .then(res => res.json())
+    fetch(proxyUrl)
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Network response was not ok.');
+      })
       .then(data => {
-        if (data.status === 'ok') {
-          setArticles(data.items.slice(0, 3)); // Get latest 3 articles
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const items = xmlDoc.querySelectorAll("item");
+        
+        const parsedArticles: Article[] = Array.from(items).slice(0, 3).map(item => {
+          const title = item.querySelector("title")?.textContent || "";
+          const link = item.querySelector("link")?.textContent || "";
+          const pubDate = item.querySelector("pubDate")?.textContent || "";
+          
+          // Medium uses content:encoded for the full post
+          // We try different ways to get the content
+          let content = "";
+          const encodedContent = item.getElementsByTagName("content:encoded")[0] || 
+                                item.getElementsByTagName("encoded")[0];
+          
+          if (encodedContent) {
+            content = encodedContent.textContent || "";
+          } else {
+            content = item.querySelector("description")?.textContent || "";
+          }
+          
+          // Extract thumbnail from content
+          const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+          const thumbnail = imgMatch ? imgMatch[1] : "";
+
+          return {
+            title,
+            link,
+            pubDate,
+            thumbnail,
+            description: content
+          };
+        });
+
+        if (parsedArticles.length > 0) {
+          setArticles(parsedArticles);
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("RSS Fetch error:", err);
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -39,7 +81,7 @@ export default function App() {
           animate={{ opacity: 1, x: 0 }}
           className="text-xs font-mono tracking-widest uppercase"
         >
-          [ FCT / 2026 ]
+          [2026 ]
         </motion.div>
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
@@ -68,7 +110,7 @@ export default function App() {
             transition={{ delay: 0.2 }}
             className="text-xs uppercase tracking-[0.3em] text-white/50 mb-6 font-mono"
           >
-            Let's Connect!
+            Available for new opportunities
           </motion.p>
           
           <motion.h1 
@@ -92,7 +134,7 @@ export default function App() {
             </p>
             <div className="flex gap-6">
               <SocialIcon icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/fcturgut/" />
-              <SocialIcon icon={<Mail size={20} />} href="mailto:fcturgut@gmail.com" />
+              <SocialIcon icon={<Mail size={20} />} href="mailto:fatih.turgut@devoteam.com" />
             </div>
           </motion.div>
         </div>
@@ -211,10 +253,10 @@ export default function App() {
           <h2 className="text-xs uppercase tracking-[0.3em] text-white/50 mb-12 font-mono">03 / Connection</h2>
           <h3 className="text-5xl md:text-8xl font-serif italic mb-12">Let's architect <br /> the future.</h3>
           <a 
-            href="mailto:fcturgut@gmail.com" 
+            href="mailto:fatih.turgut@devoteam.com" 
             className="inline-flex items-center gap-4 text-2xl border-b border-white/20 pb-2 hover:border-white transition-colors"
           >
-            fcturgut@gmail.com <ArrowUpRight />
+            fatih.turgut@devoteam.com <ArrowUpRight />
           </a>
         </div>
       </section>
@@ -224,19 +266,35 @@ export default function App() {
         <p className="text-xs text-white/40 font-mono uppercase tracking-widest">© 2026 Fatih C. Turgut</p>
         <div className="flex gap-8 text-xs text-white/40 font-mono uppercase tracking-widest">
           <a href="https://www.linkedin.com/in/fcturgut/" className="hover:text-white transition-colors">LinkedIn</a>
-          <a href="mailto:fcturgut@gmail.com" className="hover:text-white transition-colors">Email</a>
+          <a href="mailto:fatih.turgut@devoteam.com" className="hover:text-white transition-colors">Email</a>
         </div>
       </footer>
     </div>
   );
 }
 
-function ArticleCard({ article, index }: { article: Article; index: number }) {
+function ArticleCard({ article, index }: { article: Article; index: number; key?: any }) {
+  // Helper to extract first image from description if thumbnail is missing
+  const getThumbnail = (article: Article) => {
+    if (article.thumbnail && !article.thumbnail.includes('stat?event=post.opened')) {
+      return article.thumbnail;
+    }
+    // Try to find an image tag in the description
+    const imgMatch = article.description.match(/<img[^>]+src="([^">]+)"/);
+    if (imgMatch && imgMatch[1]) {
+      return imgMatch[1];
+    }
+    return `https://picsum.photos/seed/${encodeURIComponent(article.title)}/800/450`;
+  };
+
   // Helper to strip HTML and get first few sentences
   const getSnippet = (html: string) => {
-    const text = html.replace(/<[^>]*>/g, '');
+    // Remove all HTML tags
+    const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     return text.slice(0, 140) + '...';
   };
+
+  const articleImage = getThumbnail(article);
 
   return (
     <motion.a 
@@ -251,7 +309,7 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
     >
       <div className="aspect-video overflow-hidden bg-white/5 mb-6 rounded-sm">
         <img 
-          src={article.thumbnail || `https://picsum.photos/seed/${article.title}/800/450`} 
+          src={articleImage} 
           alt={article.title} 
           className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
           referrerPolicy="no-referrer"
