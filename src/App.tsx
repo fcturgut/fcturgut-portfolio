@@ -162,7 +162,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen font-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen font-sans selection:bg-white selection:text-black bg-[#285066]">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 px-6 py-8 flex justify-between items-center mix-blend-difference">
         <motion.div 
@@ -281,13 +281,13 @@ export default function App() {
             <ProjectCard 
               title="Coca-Cola Icecek" 
               category="Digital Transformation" 
-              description="Drove large-scale greenfield integration programs, establishing robust architectural patterns for enterprise-wide connectivity."
+              description="Led enterprise middleware architecture and integrations supporting SAP rollouts, mobile applications, and large-scale digital transformation."
               image="/cocacolaicecek.webp"
             />
             <ProjectCard 
               title="Turk Telekom" 
               category="Middleware Operations" 
-              description="Managed complex integration landscapes for a major telecommunications provider, ensuring high availability and performance."
+              description="Operated complex integration landscapes for a major telecommunications provider, ensuring high availability and performance."
               image="/telekom.png"
             />
           </div>
