@@ -12,23 +12,47 @@ interface Article {
 
 export default function App() {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [youtubeVideos, setYoutubeVideos] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [youtubeLoading, setYoutubeLoading] = useState(true);
 
   useEffect(() => {
     const mediumUsername = "@fcturgut"; 
     const rssUrl = `https://medium.com/feed/${mediumUsername}`;
     
-    // Using allorigins proxy to bypass CORS and get the raw XML
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+    const fetchRss = async () => {
+      try {
+        // Try multiple proxies to ensure reliability and bypass CORS/adblockers
+        const proxies = [
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
+          `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`
+        ];
+        
+        let xmlContent = "";
+        
+        for (const proxy of proxies) {
+          try {
+            const res = await fetch(proxy);
+            if (res.ok) {
+              const text = await res.text();
+              // Verify it looks like XML/RSS before accepting it
+              if (text && (text.includes('<rss') || text.includes('<feed'))) {
+                xmlContent = text;
+                break; // Successfully fetched valid XML
+              }
+            }
+          } catch (e) {
+            console.warn(`Proxy failed:`, e);
+          }
+        }
 
-    fetch(proxyUrl)
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error('Network response was not ok.');
-      })
-      .then(data => {
+        if (!xmlContent) {
+          throw new Error("Failed to fetch valid RSS feed from all proxies");
+        }
+
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
         const items = xmlDoc.querySelectorAll("item");
         
         const parsedArticles: Article[] = Array.from(items).slice(0, 3).map(item => {
@@ -65,11 +89,76 @@ export default function App() {
           setArticles(parsedArticles);
         }
         setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("RSS Fetch error:", err);
         setLoading(false);
-      });
+      }
+    };
+
+    const fetchYouTube = async () => {
+      const channelId = "UCuPKOa-1kcTEhjsi2urBJ0Q";
+      const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+      
+      try {
+        const proxies = [
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
+          `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`
+        ];
+        
+        let xmlContent = "";
+        
+        for (const proxy of proxies) {
+          try {
+            const res = await fetch(proxy);
+            if (res.ok) {
+              const text = await res.text();
+              if (text && text.includes('<feed')) {
+                xmlContent = text;
+                break;
+              }
+            }
+          } catch (e) {
+            console.warn(`YouTube Proxy failed:`, e);
+          }
+        }
+
+        if (!xmlContent) {
+          throw new Error("Failed to fetch valid YouTube RSS feed");
+        }
+
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+        const entries = xmlDoc.querySelectorAll("entry");
+        
+        const parsedVideos: Article[] = Array.from(entries).slice(0, 3).map(entry => {
+          const title = entry.querySelector("title")?.textContent || "";
+          const link = entry.querySelector("link")?.getAttribute("href") || "";
+          const pubDate = entry.querySelector("published")?.textContent || "";
+          const description = entry.getElementsByTagName("media:description")[0]?.textContent || "";
+          const thumbnail = entry.getElementsByTagName("media:thumbnail")[0]?.getAttribute("url") || "";
+
+          return {
+            title,
+            link,
+            pubDate,
+            thumbnail,
+            description
+          };
+        });
+
+        if (parsedVideos.length > 0) {
+          setYoutubeVideos(parsedVideos);
+        }
+        setYoutubeLoading(false);
+      } catch (err) {
+        console.error("YouTube Fetch error:", err);
+        setYoutubeLoading(false);
+      }
+    };
+
+    fetchRss();
+    fetchYouTube();
   }, []);
 
   return (
@@ -81,7 +170,7 @@ export default function App() {
           animate={{ opacity: 1, x: 0 }}
           className="text-xs font-mono tracking-widest uppercase"
         >
-          [2026 ]
+          [2026]
         </motion.div>
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
@@ -91,9 +180,11 @@ export default function App() {
           <a href="#about" className="hover:opacity-50 transition-opacity">About</a>
           <a href="#work" className="hover:opacity-50 transition-opacity">Experience</a>
           <a href="#articles" className="hover:opacity-50 transition-opacity">Articles</a>
+          <a href="#youtube" className="hover:opacity-50 transition-opacity">Video</a>
           <a href="#contact" className="hover:opacity-50 transition-opacity">Contact</a>
           <a 
-            href="#" 
+            href="/Fatih_Cihat_Turgut_CV.pdf" 
+            download="Fatih_Cihat_Turgut_CV.pdf"
             className="px-4 py-2 border border-white/20 hover:bg-white hover:text-black transition-all duration-300 rounded-full"
           >
             Download CV
@@ -110,7 +201,7 @@ export default function App() {
             transition={{ delay: 0.2 }}
             className="text-xs uppercase tracking-[0.3em] text-white/50 mb-6 font-mono"
           >
-            Available for new opportunities
+            Let's Connect
           </motion.p>
           
           <motion.h1 
@@ -134,7 +225,7 @@ export default function App() {
             </p>
             <div className="flex gap-6">
               <SocialIcon icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/fcturgut/" />
-              <SocialIcon icon={<Mail size={20} />} href="mailto:fatih.turgut@devoteam.com" />
+              <SocialIcon icon={<Mail size={20} />} href="mailto:fcturgut@gmail.com" />
             </div>
           </motion.div>
         </div>
@@ -171,40 +262,40 @@ export default function App() {
       </section>
 
       {/* Work Section */}
-      <section id="work" className="py-32 px-6 md:px-24 bg-white text-black">
+      <section id="work" className="py-32 px-6 md:px-24 bg-[#e6f0f5] text-[#1a3848]">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-xs uppercase tracking-[0.3em] text-black/50 mb-12 font-mono">02 / Professional Journey</h2>
+          <h2 className="text-xs uppercase tracking-[0.3em] text-[#1a3848]/50 mb-12 font-mono">02 / Professional Journey</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
             <ProjectCard 
               title="Devoteam" 
               category="Integration Leadership" 
               description="Leading technical teams to deliver complex digital transformation programs using MuleSoft and modern API strategies."
-              image="https://picsum.photos/seed/devoteam/1200/800"
+              image="/devoteam.jpg"
             />
             <ProjectCard 
               title="Brenntag" 
-              category="Global Architecture" 
+              category="Global Integration Architecture" 
               description="Architected scalable integration solutions for the world's leading chemical distributor, focusing on cost-efficiency and reliability."
-              image="https://picsum.photos/seed/brenntag/1200/800"
+              image="/brenntag1.webp"
             />
             <ProjectCard 
               title="Coca-Cola Icecek" 
               category="Digital Transformation" 
               description="Drove large-scale greenfield integration programs, establishing robust architectural patterns for enterprise-wide connectivity."
-              image="https://picsum.photos/seed/cocacola/1200/800"
+              image="/cocacolaicecek.webp"
             />
             <ProjectCard 
               title="Turk Telekom" 
-              category="Enterprise Integration" 
+              category="Middleware Operations" 
               description="Managed complex integration landscapes for a major telecommunications provider, ensuring high availability and performance."
-              image="https://picsum.photos/seed/telekom/1200/800"
+              image="/telekom.png"
             />
           </div>
         </div>
       </section>
 
       {/* Articles Section */}
-      <section id="articles" className="py-32 px-6 md:px-24 bg-[#0a0a0a] border-t border-white/5">
+      <section id="articles" className="py-32 px-6 md:px-24 bg-[#1f4255] border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-16">
             <div>
@@ -247,16 +338,60 @@ export default function App() {
         </div>
       </section>
 
+      {/* YouTube Section */}
+      <section id="youtube" className="py-32 px-6 md:px-24 bg-[#1f4255] border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-end mb-16">
+            <div>
+              <h2 className="text-xs uppercase tracking-[0.3em] text-white/50 mb-6 font-mono">04 / Video</h2>
+              <h3 className="text-4xl md:text-5xl font-serif italic">Latest from YouTube</h3>
+            </div>
+            <a 
+              href="https://youtube.com/@fatihcihatturgut?si=g78LBJbSvIp9iQds" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs uppercase tracking-widest font-mono text-white/40 hover:text-white transition-colors flex items-center gap-2"
+            >
+              View channel <ArrowUpRight size={14} />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {youtubeLoading ? (
+              // Loading Skeletons
+              [1, 2, 3].map(i => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-video bg-white/5 mb-6 rounded-sm" />
+                  <div className="h-4 bg-white/10 w-3/4 mb-4" />
+                  <div className="h-3 bg-white/5 w-full mb-2" />
+                  <div className="h-3 bg-white/5 w-2/3" />
+                </div>
+              ))
+            ) : youtubeVideos.length > 0 ? (
+              youtubeVideos.map((video, index) => (
+                <ArticleCard key={index} article={video} index={index} actionLabel="Watch Video" />
+              ))
+            ) : (
+              // Fallback if no videos found
+              <div className="col-span-full py-20 text-center border border-dashed border-white/10 rounded-lg">
+                <BookOpen className="mx-auto mb-4 text-white/20" size={32} />
+                <p className="text-white/40 font-light">No videos found.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section */}
-      <section id="contact" className="py-32 px-6 md:px-24 bg-[#050505]">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-xs uppercase tracking-[0.3em] text-white/50 mb-12 font-mono">03 / Connection</h2>
-          <h3 className="text-5xl md:text-8xl font-serif italic mb-12">Let's architect <br /> the future.</h3>
+      <section id="contact" className="py-32 px-6 md:px-24 bg-[#1a3848]">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-xs uppercase tracking-[0.3em] text-white/50 mb-12 font-mono">05 / Connection</h2>
+          <h3 className="text-5xl md:text-8xl font-serif italic mb-12">Let's architect the future.</h3>
           <a 
-            href="mailto:fatih.turgut@devoteam.com" 
-            className="inline-flex items-center gap-4 text-2xl border-b border-white/20 pb-2 hover:border-white transition-colors"
+            href="mailto:fcturgut@gmail.com" 
+            className="inline-flex items-center gap-4 text-2xl border-b border-white/20 pb-2 hover:border-white transition-colors text-center"
           >
-            fatih.turgut@devoteam.com <ArrowUpRight />
+            fcturgut@gmail.com <ArrowUpRight />
           </a>
         </div>
       </section>
@@ -266,14 +401,14 @@ export default function App() {
         <p className="text-xs text-white/40 font-mono uppercase tracking-widest">© 2026 Fatih C. Turgut</p>
         <div className="flex gap-8 text-xs text-white/40 font-mono uppercase tracking-widest">
           <a href="https://www.linkedin.com/in/fcturgut/" className="hover:text-white transition-colors">LinkedIn</a>
-          <a href="mailto:fatih.turgut@devoteam.com" className="hover:text-white transition-colors">Email</a>
+          <a href="mailto:fcturgut@gmail.com" className="hover:text-white transition-colors">Email</a>
         </div>
       </footer>
     </div>
   );
 }
 
-function ArticleCard({ article, index }: { article: Article; index: number; key?: any }) {
+function ArticleCard({ article, index, actionLabel = "Read Article" }: { article: Article; index: number; key?: any; actionLabel?: string }) {
   // Helper to extract first image from description if thumbnail is missing
   const getThumbnail = (article: Article) => {
     if (article.thumbnail && !article.thumbnail.includes('stat?event=post.opened')) {
@@ -325,7 +460,7 @@ function ArticleCard({ article, index }: { article: Article; index: number; key?
         {getSnippet(article.description)}
       </p>
       <div className="mt-6 flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white/20 group-hover:text-white transition-colors">
-        Read Article <ArrowUpRight size={12} />
+        {actionLabel} <ArrowUpRight size={12} />
       </div>
     </motion.a>
   );

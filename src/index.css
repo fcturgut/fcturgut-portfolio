@@ -9,7 +9,6 @@
 
 @layer base {
   body {
-    @apply bg-[#050505] text-white antialiased selection:bg-white selection:text-black;
-    scroll-behavior: smooth;
+    @apply bg-[#285066] text-white antialiased selection:bg-white selection:text-[#285066];
   }
 }
