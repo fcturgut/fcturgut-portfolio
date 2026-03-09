@@ -268,7 +268,7 @@ export default function App() {
             <img src="/mulesoft-integration-architect.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
             <img src="/mulesoft-meetup-leader.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
             <img src="/agentblazer-level-1.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
-            <img src="/azure-data-fundamentals.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/azure-fundamentals.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
             
           </div>
         </div>
