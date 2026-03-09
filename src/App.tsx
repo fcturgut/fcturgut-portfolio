@@ -259,6 +259,19 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* Badges */}
+        <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-white/10">
+          <h3 className="text-xs uppercase tracking-[0.3em] text-white/50 mb-12 font-mono text-center">Certifications</h3>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+            <img src="/mulesoft-platform-architect.png" alt="MuleSoft Platform Integration Architect" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/mulesoft-integration-architect.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/mulesoft-meetup-leader.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/agentblazer-level-1.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/azure-data-fundamentals.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            
+          </div>
+        </div>
       </section>
 
       {/* Work Section */}
