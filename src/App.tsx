@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { ArrowUpRight, Github, Linkedin, Mail, Twitter, BookOpen } from "lucide-react";
+import { ArrowUpRight, Github, Linkedin, Mail, Twitter, BookOpen, Menu, X } from "lucide-react";
 
 interface Article {
   title: string;
@@ -15,6 +15,7 @@ export default function App() {
   const [youtubeVideos, setYoutubeVideos] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [youtubeLoading, setYoutubeLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const mediumUsername = "@fcturgut"; 
@@ -164,7 +165,7 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans selection:bg-white selection:text-black bg-[#285066]">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 px-6 py-8 flex justify-between items-center mix-blend-difference">
+      <nav className="fixed top-0 w-full z-50 px-6 py-6 bg-[#1a3848]/90 backdrop-blur-md border-b border-white/10 flex justify-between items-center transition-all duration-300">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -172,10 +173,12 @@ export default function App() {
         >
           [2026]
         </motion.div>
+
+        {/* Desktop Menu */}
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex gap-8 text-xs font-mono tracking-widest uppercase items-center"
+          className="hidden md:flex gap-8 text-xs font-mono tracking-widest uppercase items-center"
         >
           <a href="#about" className="hover:opacity-50 transition-opacity">About</a>
           <a href="#work" className="hover:opacity-50 transition-opacity">Experience</a>
@@ -190,10 +193,41 @@ export default function App() {
             Download CV
           </a>
         </motion.div>
+
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden z-50">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white p-2" aria-label="Toggle Menu">
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative h-screen flex flex-col justify-center px-6 md:px-24">
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed inset-0 z-40 bg-[#1a3848] pt-32 px-6 flex flex-col gap-8 text-sm font-mono tracking-widest uppercase items-center md:hidden"
+        >
+          <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-50 transition-opacity">About</a>
+          <a href="#work" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-50 transition-opacity">Experience</a>
+          <a href="#articles" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-50 transition-opacity">Articles</a>
+          <a href="#youtube" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-50 transition-opacity">Video</a>
+          <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-50 transition-opacity">Contact</a>
+          <a 
+            href="/Fatih_Cihat_Turgut_CV.pdf" 
+            download="Fatih_Cihat_Turgut_CV.pdf"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-6 py-3 border border-white/20 hover:bg-white hover:text-black transition-all duration-300 rounded-full mt-4"
+          >
+            Download CV
+          </a>
+        </motion.div>
+      )}
+
+      <main>
+        {/* Hero Section */}
+        <section className="relative h-screen flex flex-col justify-center px-6 md:px-24">
         <div className="max-w-7xl mx-auto w-full">
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -224,8 +258,8 @@ export default function App() {
               Specializing in the design and implementation of robust, scalable architectures. 15+ years of driving digital transformation for global organizations.
             </p>
             <div className="flex gap-6">
-              <SocialIcon icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/fcturgut/" />
-              <SocialIcon icon={<Mail size={20} />} href="mailto:fcturgut@gmail.com" />
+              <SocialIcon icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/fcturgut/" ariaLabel="LinkedIn Profile" />
+              <SocialIcon icon={<Mail size={20} />} href="mailto:fcturgut@gmail.com" ariaLabel="Email Contact" />
             </div>
           </motion.div>
         </div>
@@ -264,12 +298,12 @@ export default function App() {
         <div className="max-w-7xl mx-auto mt-32 pt-16 border-t border-white/10">
           <h3 className="text-xs uppercase tracking-[0.3em] text-white/50 mb-12 font-mono text-center">Certifications</h3>
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            <img src="/mulesoft-platform-architect.png" alt="MuleSoft Platform Integration Architect" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
-            <img src="/mulesoft-integration-architect.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+           <img src="/mulesoft-platform-architect.png" alt="MuleSoft Platform Architect" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/mulesoft-integration-architect.png" alt="Mulesoft Integration Architect" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/ambassador.png" alt="Mulesoft Ambassador" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
             <img src="/mulesoft-meetup-leader.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
-            <img src="/agentblazer-level-1.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
-            <img src="/azure-fundamentals.png" alt="MuleSoft Meetup Group Leader" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
-            
+            <img src="/agentblazer-level-1.png" alt="Agentblazer Champion" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
+            <img src="/azure-fundamentals.png" alt="Azure Fundamentals Certification" className="w-32 h-32 object-contain hover:scale-110 transition-transform duration-300" />
           </div>
         </div>
       </section>
@@ -408,6 +442,7 @@ export default function App() {
           </a>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="py-12 px-6 md:px-24 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -479,10 +514,11 @@ function ArticleCard({ article, index, actionLabel = "Read Article" }: { article
   );
 }
 
-function SocialIcon({ icon, href }: { icon: ReactNode; href: string }) {
+function SocialIcon({ icon, href, ariaLabel }: { icon: ReactNode; href: string; ariaLabel: string }) {
   return (
     <a 
       href={href} 
+      aria-label={ariaLabel}
       className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
     >
       {icon}
@@ -521,7 +557,7 @@ function ProjectCard({ title, category, image, description }: { title: string; c
         <div className="flex justify-between items-end">
           <div>
             <p className="text-xs font-mono uppercase tracking-widest text-black/40 mb-2">{category}</p>
-            <h4 className="text-3xl font-light">{title}</h4>
+            <h3 className="text-3xl font-light">{title}</h3>
           </div>
           <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
